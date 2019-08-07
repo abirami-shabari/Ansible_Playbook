@@ -1,0 +1,24 @@
+- hosts: localhost
+  remote_user: root
+  connection: local
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Install Apache
+      yum: pkg=httpd state=latest
+    - name: start apache
+      service: name=httpd state=started enabled=yes
+    - name: ensure apache is running
+      service: name=httpd state=running enabled=yes
+    - name: Apache on port 80
+      firewalld:
+      service: http
+      permanent: true
+      state: enabled
+    - name: setup firewalld
+      firewalld:
+      service: http
+      permanent: true
+      state: enabled
+    - name: reload firewalld
+      service: name=firewalld state=restarted
