@@ -1,0 +1,39 @@
+- name: creation of launch_elb_autoscaling 
+  hosts: localhost
+  connection: local
+  tasks:
+  - name: create ec2 launch config
+    ec2_lc:
+     name: launch
+     image_id: ami-0b898040803850657
+     instance_type: t2.micro
+     key_name: monday
+     security_groups: ['launch-wizard-30']
+    region: us-east-1
+
+  - name: Create the ELB
+    ec2_elb_lb:
+     name: new-load-balancer
+     state: present
+     region: us-east-1
+     zones:
+      - us-east-1a
+      - us-east-1b
+     listeners:
+      - protocol: http
+        load_balancer_port: 80
+        instance_port: 80
+
+  - name: creation of auto scaling group
+    ec2_asg:
+     name: newautogroup
+     region: us-east-1
+     load_balancers: new-load-balancer
+     availability_zones: ['us-east-1a']
+     launch_config_name: 'launch'
+     min_size: 1
+     max_size: 1
+     desired_capacity: 1
+     replace_all_instances: yes
+     vpc_zone_identifier: ['subnet-867753a8']
+
